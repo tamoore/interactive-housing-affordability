@@ -1,0 +1,29 @@
+{
+	"name": "interactive-housing",
+	"version": "0.1.2",
+	"homepage": "https://github.com/toddmoore/interactive-anzac-day",
+	"authors": [
+		"Todd Moore <todd.moore@guardian.co.uk>"
+	],
+	"license": "MIT",
+	"ignore": [
+		"**/.*",
+		"node_modules",
+		"bower_components",
+		"test",
+		"tests"
+	],
+	"dependencies": {
+		"guss-rem": "~1",
+		"guss-grid-system": "~1",
+		"guss-typography": "~3",
+		"guss-layout": "~1",
+		"guss-css3": "~2",
+		"guss-colours": "~3",
+		"guss-webfonts": "~3",
+		"pasteup-buttons": "latest",
+		"bourbon": "latest",
+		"neat" : "latest",
+		"fontawesome": "~4.3.0"
+	}
+}
