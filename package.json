@@ -13,12 +13,14 @@
       "csv": "npm:csv@^0.4.5",
       "d3": "npm:d3@^3.5.5",
       "jquery": "github:components/jquery@^2.1.4",
+      "json": "github:systemjs/plugin-json@^0.1.0",
       "jsx": "github:floatdrop/plugin-jsx@^1.1.0",
       "material-ui": "npm:material-ui@^0.9.2",
       "pubsub-js": "npm:pubsub-js@^1.5.2",
       "react": "npm:react@^0.13.3",
       "react-slider": "npm:react-slider@^0.5.1",
-      "text": "github:systemjs/plugin-text@^0.0.2"
+      "text": "github:systemjs/plugin-text@^0.0.2",
+      "topojson": "npm:topojson@^1.6.19"
     },
     "devDependencies": {
       "traceur": "github:jmcriffey/bower-traceur@0.0.87",

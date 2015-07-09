@@ -32,7 +32,7 @@ gulp.task('build', ['styles'], function() {
 		.pipe(shell([
 			'jspm bundle-sfx --minify src/lib/index',
 			'cp -f ./build.js ./build/',
-			'cp -rf ./src/css ./build && cp -rf ./src/images ./build/images',
+			'cp -rf ./src/css ./build && cp -rf ./src/images ./build',
 			'cp -f ./src/boot.js ./build'
 		]));
 

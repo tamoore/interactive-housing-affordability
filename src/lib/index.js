@@ -1,26 +1,33 @@
 import React from 'react';
 import $ from 'jquery';
 import Pubsub from 'pubsub-js';
-
 import { SliderComponent } from './slider.jsx!';
 import { SavingsLength } from './calculations.jsx!';
-
 import d3 from 'd3';
 import csv from 'csv';
 import csvData from './data/data.csv!text';
+import topoJson from './data/lga.json!';
+import topojson from 'topojson';
 
-class Application {
+
+export class Application {
 
     constructor(){
-
+        L.mapbox.accessToken = 'pk.eyJ1IjoiZ3VhcmRpYW5hdXMiLCJhIjoidXp3UFpTTSJ9.gRE4cwQj5wWSV50AFJslOw';
         var self = this;
         this.currentState = "NSW";
         this.typeIndex = 2;
 
         React.render(React.createElement(SliderComponent), document.getElementById('sliderComponent'));
         React.render(React.createElement(SavingsLength), document.getElementById('resultsContainer'));
+        this.handleSaving = this.handleSaving.bind(this);
+        Pubsub.subscribe('saving', this.handleSaving);
 
         $('.roles-row li').on('click', function(){
+            setTimeout(()=>{
+                self.drawLayers();
+                self.processCharts();
+            }, 500);
 
             if(this.getAttribute('data-week-saving') || this.getAttribute('data-mean-price') || this.getAttribute('data-type')){
 
@@ -45,10 +52,12 @@ class Application {
                 }
 
                 if(this.getAttribute('data-mean-price')){
-
                     Pubsub.publish('mean-price', this.getAttribute('data-mean-price'));
+                    self.lon = JSON.parse(this.getAttribute('data-mean-price')).lon;
+                    self.lat = JSON.parse(this.getAttribute('data-mean-price')).lat;
                     self.currentState = JSON.parse(this.getAttribute('data-mean-price')).state;
                     self.processCharts();
+                    self.setLatLong();
                     return;
                 }
 
@@ -57,13 +66,7 @@ class Application {
                     Pubsub.publish('you');
                     self.you = false;
                 }
-
-
-
-
             }
-
-
 
             if(this.getAttribute('data-you') == 'true'){
                 if(self.you){
@@ -80,17 +83,14 @@ class Application {
                 $(this).parent().find('li').removeClass('active');
                 $(this).addClass('active');
             }
-
-
-
         });
 
         csv.parse(csvData, (err, output)=>{
             if(err){ console.log(err); return; }
             this.data = output;
             this.setupCharts();
+            this.paintMap();
         });
-
     }
 
     addActive(elment){
@@ -124,13 +124,13 @@ class Application {
         }).filter((item)=>{
             return item[index].length
         }).reverse();
-
     }
+
     getTopFive(index){
         let data = this.sortData(index).splice(0,5);
         let array = [];
         data.forEach((item)=>{
-            array.push({"suburb": item[1], "price": item[index]})
+            array.push({"suburb": item[1], "price": item[index], "timeToPayOff": this.getSavingsLength(Application.savings, item[index]).payOffTime})
         });
         return array;
     }
@@ -140,12 +140,112 @@ class Application {
             data =data.splice(data.length-5,data.length);
         let array = [];
         data.forEach((item)=>{
-            array.push({"suburb": item[1], "price": item[index]})
+            array.push({"suburb": item[1], "price": item[index], "timeToPayOff": this.getSavingsLength(Application.savings, item[index]).payOffTime})
         });
         return array.reverse();
     }
 
+    setLatLong(){
+       this.map.setView([this.lat, this.lon], 9);
+    }
+
+    drawLayers(){
+        var color = ['#ffffb2','#bd0026'];
+        var scaleColor = d3.scale.linear()
+            .range(color);
+        var range = [];
+
+        this.layers.eachLayer((item)=>{
+            this.data.forEach((house)=>{
+                if (house[4] == item.feature.properties.LGA_CODE14){
+                    var payOffTime = this.getSavingsLength(Application.savings,parseInt(house[2])).payOffTime;
+                    range.push(payOffTime);
+                }
+            });
+        });
+        var catExtent = d3.extent(range);
+        scaleColor.domain(catExtent);
+        console.log(this.map);
+        this.layers.eachLayer((item)=>{
+            this.data.forEach((house)=>{
+                if (house[4] == item.feature.properties.LGA_CODE14){
+                    var payOffTime = this.getSavingsLength(Application.savings,parseInt(house[2])).payOffTime;
+                    item.name = house[1];
+                    if(item.name == "Brisbane"){
+                        console.log("Brisbane")
+                    }
+                    item.payOffTime = payOffTime;
+                    item.setStyle({
+                        fillColor: scaleColor(payOffTime),
+                        fillOpacity: 0.8,
+                        strokeColor: '#ffffff',
+                        strokeWidth: 2,
+                        weight: 0.8,
+                        name: house[1],
+                        payOffTime: payOffTime
+
+                    });
+                }
+            });
+        });
+
+    }
+    handleSaving(){
+        this.changingSaving = true;
+        setTimeout(()=>{
+            this.changingSaving = false;
+        },10);
+        setTimeout(()=>{
+            if(!this.changingSaving){
+                this.drawLayers();
+                this.processCharts();
+            }
+        }, 500);
+    }
+
+    paintMap(){
+        var width = $("#mapContainer").width();
+        var height = width*0.581;
+        var features = (topojson.feature(topoJson, topoJson.objects.lgas).features);
+        this.map = L.mapbox.map('mapContainer', 'guardianaus.0963bc53').setView([-24, 132], 4);
+        var map = this.map;
+        this.topology = omnivore.topojson.parse(topoJson);
+        this.layers = L.mapbox.featureLayer(this.topology).addTo(map);
+        this.drawLayers()
+
+        this.layers.on("click", (e)=>{
+            if(e.layer.options.name){
+                this.popup = L.popup()
+                    .setLatLng(e.latlng)
+                    .setContent("<b>Suburb:</b> " + e.layer.options.name + " <br> <b>Deposit will take </b> " + e.layer.options.payOffTime + "  years to save")
+                    .openOn(map);
+            }
+        });
+    }
+
+
+    getSavingsLength(savingAmountByWeek, aveHousePrice){
+        var deposit = 0.2*aveHousePrice;
+        var interestRateWk = 0.02/52;
+        var weeks = 0;
+        var savings = savingAmountByWeek + 0;
+
+        while (savings < deposit) {
+            savings = savings + savingAmountByWeek + (savings*interestRateWk);
+            weeks++;
+        }
+
+        var years = (weeks/52).toFixed(1);
+        var weeks = weeks;
+        var days = weeks * 7;
+        var hours = Math.floor(days)*24;
+        var remainingWeeks = weeks % 52;
+        var payOffTime = {"payoffTimeStr":years + " years","payOffTime":parseFloat(years)};
+        return payOffTime;
+    }
+
     paintGraph(id, data){
+        console.log(data);
         var getW = document.getElementById(id).clientWidth;
         var getH = 300;
 
@@ -173,7 +273,7 @@ class Application {
             .orient("left");
 
         x.domain(data.map(function(d) { return d.suburb; }))
-        y.domain([0, d3.max(data, function(d) { return parseInt(d.price); })]);
+        y.domain([0, d3.max(data, function(d) { return d.timeToPayOff })]);
 
         svg.append("g")
             .attr("class", "x axis")
@@ -189,7 +289,7 @@ class Application {
             .attr("dy", ".71em")
             .attr("class", "axis")
             .style("text-anchor", "end")
-            .text("");
+            .text("years");
 
         var graphBars = svg.selectAll(".bar")
             .data(data, function(d) { return d.suburb});
@@ -205,8 +305,8 @@ class Application {
         graphBars
             .transition()
             .duration(2000)
-            .attr("y", function(d) { return y(d.price); })
-            .attr("height", function(d) { return height - y(d.price); });
+            .attr("y", function(d) { return y(d.timeToPayOff); })
+            .attr("height", function(d) { return height - y(d.timeToPayOff); });
 
         graphBars.exit()
             .transition()
@@ -231,4 +331,5 @@ class Application {
 
 
 }
+Application.savings = 412;
 var App = new Application();
