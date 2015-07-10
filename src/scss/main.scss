@@ -119,7 +119,7 @@ section:first-child {
 	  min-width: 7rem;
 
 	  display: inline-block;
-	  height: 3rem;
+	  height: 5rem;
 	  width: 3rem;
 	  margin-right: 1.5rem;
 	  opacity: .5;
@@ -198,7 +198,7 @@ section:first-child {
 	max-width: 40rem;
 	margin: 0 auto;
 	li {
-
+	  min-height: 5rem;
 	  margin-bottom: 1rem;
 	  margin-top: 1rem;
 	}
@@ -238,7 +238,7 @@ section:first-child {
 	  border: none;
 	  @include fs-headline(7);
 	  width: 100%;
-	  font-size: 7rem;
+	  font-size: 6rem;
 	  @include mq($until: tablet){
 		font-size: 4rem;
 	  }

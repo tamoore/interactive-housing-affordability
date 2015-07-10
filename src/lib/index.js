@@ -38,10 +38,12 @@ export class Application {
                         case "house":
                             self.typeIndex = 2;
                             document.getElementById('house-unit').textContent = "house";
+                            document.getElementById('house-unit-2').textContent = "house";
                             break;
                         case "unit":
                             self.typeIndex = 3;
                             document.getElementById('house-unit').textContent = "unit";
+                            document.getElementById('house-unit-2').textContent = "unit";
                             break;
                     }
                     self.processCharts();
@@ -334,7 +336,7 @@ export class Application {
 
     setupCharts(){
         console.log(this.typeIndex);
-        document.getElementById('state-label').textContent = this.currentState;
+
         this.fileredData = this.data.filter((item)=>{
             return item[0] == this.currentState;
         });
