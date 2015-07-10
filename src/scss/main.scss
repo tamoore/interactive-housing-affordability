@@ -507,6 +507,16 @@ $scale: 2;
   //position: absolute;
 
 }
+@at-root {
+	.key {
+		text-align: left;
+		span {
+			@include fs-data(1);
+			font-size: .7rem;
+			
+		}
+	}
+}
 
 
 @at-root {

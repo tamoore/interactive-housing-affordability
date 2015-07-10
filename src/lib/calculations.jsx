@@ -23,7 +23,6 @@ export class SavingsLength extends React.Component {
         Pubsub.subscribe('mean-price', this.handleMeanPrice);
         Pubsub.subscribe('saving', this.handleSaving);
         Pubsub.subscribe('unit-type', (event, unit)=>{
-
             this.currentUnitType = unit;
             this.setState({
                 unit: unit,
@@ -32,6 +31,7 @@ export class SavingsLength extends React.Component {
             this.getSavingsLength(this.state.defaultWeek, this.state.defaultMeanPrice)
         });
     }
+
     getTimeToMars(timeInYears){
         return { value: ((timeInYears*364)/253).toFixed(1) + " times", class:"mars", text: "You could make the trip to Mars","img": "images/rocket.svg" };
     }
@@ -41,7 +41,7 @@ export class SavingsLength extends React.Component {
 
     getPineTreeHeight(timeInYears){
 
-        return { value: (-0.016*Math.pow(timeInYears,2).toFixed(1) + 1.5457*timeInYears+0.592) + "m", class:"pine", text: "A gum tree could grow to a majestic height of","img": "images/tree.svg"};
+        return { value: (-0.016*Math.pow(timeInYears,2) + 1.5457*timeInYears+0.592).toFixed(1) + "m", class:"pine", text: "A gum tree could grow to a majestic height of","img": "images/tree.svg"};
     }
 
     getMedicine(timeInYears){

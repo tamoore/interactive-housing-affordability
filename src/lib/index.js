@@ -37,9 +37,11 @@ export class Application {
                     switch(this.getAttribute('data-type')){
                         case "house":
                             self.typeIndex = 2;
+                            document.getElementById('house-unit').textContent = "house";
                             break;
                         case "unit":
                             self.typeIndex = 3;
+                            document.getElementById('house-unit').textContent = "unit";
                             break;
                     }
                     self.processCharts();
@@ -130,14 +132,19 @@ export class Application {
     }
 
     getTopFive(index){
-        let data = this.sortData(index).splice(0,5);
+        let data = this.sortData(index)
         let array = [];
-        data.forEach((item)=>{
-            array.push({"suburb": item[1], "price": item[index], "timeToPayOff": this.getSavingsLength(Application.savings, item[index]).payOffTime})
+        data.sort(function(a,b){
+            return parseInt(b[index])-parseInt(a[index]);
         });
-        array.sort(function(a,b){
-            return b.price-a.price;
-        });
+        for(var i=0;i<data.length;i++){
+
+            if(i<5){
+                console.log(data[i][index]);
+                array.push({"suburb": data[i][1], "price": data[i][index], "timeToPayOff": this.getSavingsLength(Application.savings,  parseInt(data[i][index])).payOffTime});
+            }
+            
+        }
         return array;
     }
 
@@ -147,7 +154,8 @@ export class Application {
 
         let array = [];
         data2.forEach((item)=>{
-            array.push({"suburb": item[1], "price": item[index], "timeToPayOff": this.getSavingsLength(Application.savings, item[index]).payOffTime})
+
+            array.push({"suburb": item[1], "price": item[index], "timeToPayOff": this.getSavingsLength(Application.savings, parseInt(item[index])).payOffTime})
         });        
         array.sort(function(a,b){
             return b.price-a.price;
