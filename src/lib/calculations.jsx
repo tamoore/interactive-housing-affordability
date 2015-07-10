@@ -6,7 +6,7 @@ export class SavingsLength extends React.Component {
     constructor(){
         super();
 
-
+        this.randomIndex = Math.floor(this.getRandomArbitrary(0,4));
         this.handleMeanPrice = this.handleMeanPrice.bind(this);
         this.handleSaving = this.handleSaving.bind(this);
         this.currentUnitType = "house";
@@ -33,19 +33,19 @@ export class SavingsLength extends React.Component {
         });
     }
     getTimeToMars(timeInYears){
-        return { value: Math.floor((timeInYears*364)/253) + " times", class:"mars", text: "If you were travelling at the same speed as curiosity, you could go to Mars","img": "images/rocket.svg" };
+        return { value: ((timeInYears*364)/253).toFixed(1) + " times", class:"mars", text: "You could make the trip to Mars","img": "images/rocket.svg" };
     }
     getSlothTime(timeInYears){
-        return { value: Math.floor(((timeInYears * 8765.81) * 1.944) / 40075) + " times", class:"sloth", text: "If a sloth tried to circumnavigate the globe they would do it","img": "images/sloth.svg"};
+        return { value: (((timeInYears * 8765.81) * 1.944) / 40075).toFixed(1) + " times", class:"sloth", text: "A determined sloth could circumnavigate the globe","img": "images/sloth.svg"};
     }
 
     getPineTreeHeight(timeInYears){
 
-        return { value: Math.floor(-0.016*Math.pow(timeInYears,2) + 1.5457*timeInYears+0.592) + "m", class:"pine", text: "A gum tree could grow to a majestic height of","img": "images/tree.svg"};
+        return { value: (-0.016*Math.pow(timeInYears,2).toFixed(1) + 1.5457*timeInYears+0.592) + "m", class:"pine", text: "A gum tree could grow to a majestic height of","img": "images/tree.svg"};
     }
 
     getMedicine(timeInYears){
-        return {value: Math.floor((timeInYears/6)) +" times", class:"medicine", text: "If you started now, you would achieve a Medicine degree", "img": "images/medicine.svg"};
+        return {value: (timeInYears/6).toFixed(1) +" times", class:"medicine", text: "You could study for a medicine degree", "img": "images/medicine.svg"};
     }
 
     getRandomArbitrary(min, max) {
@@ -64,9 +64,8 @@ export class SavingsLength extends React.Component {
         this.setState({
             defaultWeek: parseInt(saving)
         });
-        setTimeout(()=>{
-            this.getSavingsLength(this.state.defaultWeek, this.state.defaultMeanPrice);
-        }, 2000);
+        this.getSavingsLength(this.state.defaultWeek, this.state.defaultMeanPrice);
+        
 
     }
 
@@ -104,24 +103,34 @@ export class SavingsLength extends React.Component {
         var hours = Math.floor(days)*24;
         var remainingWeeks = weeks % 52;
         var payOffTime = {"payoffTimeStr":years + " years","payOffTime":parseFloat(years)};
-        var randomIndex = Math.floor(this.getRandomArbitrary(0,4));
+        
 
         this.setState({
             payOffTime: payOffTime.payOffTime,
             weeks: weeks,
             days: this.numberWithCommas(Math.floor(days)),
             hours: this.numberWithCommas(hours),
-            funFact: options[randomIndex].apply(this, [payOffTime.payOffTime])
+            funFact: options[this.randomIndex].apply(this, [payOffTime.payOffTime])
         });
         return payOffTime;
     }
 
     render(){
-        var style = {
-            float: 'right',
-            height: 'auto'
+        var ie11andabove = navigator.userAgent.indexOf('Trident') != -1 && navigator.userAgent.indexOf('MSIE') == -1;
+        var ie10andbelow = navigator.userAgent.indexOf('MSIE') != -1;
+        if (ie11andabove || ie10andbelow) {
+            var style = {
+                float: 'right',
+                height: 'auto'
 
+            }
 
+        }else{
+            var style = {
+                float: 'right',
+                width: '100px'
+
+            }
         }
       return  (
             <h1>
@@ -141,7 +150,7 @@ export class SavingsLength extends React.Component {
                     <ul>
                         <li className={this.state.funFact.class}>
 
-                            <p><span>{this.state.funFact.text}</span></p>
+                            <p><span><strong>In that time</strong></span><br/><span>{this.state.funFact.text}</span></p>
                             <p>{this.state.funFact.value}</p>
 
                             <img src={this.state.funFact.img} style={style} />

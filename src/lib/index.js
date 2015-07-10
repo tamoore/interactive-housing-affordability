@@ -56,6 +56,7 @@ export class Application {
                     self.lon = JSON.parse(this.getAttribute('data-mean-price')).lon;
                     self.lat = JSON.parse(this.getAttribute('data-mean-price')).lat;
                     self.currentState = JSON.parse(this.getAttribute('data-mean-price')).state;
+                    document.getElementById('city').textContent = JSON.parse(this.getAttribute('data-mean-price')).capital;
                     self.processCharts();
                     self.setLatLong();
                     return;
@@ -65,6 +66,7 @@ export class Application {
                     $('body').removeClass('js-you');
                     Pubsub.publish('you');
                     self.you = false;
+                    document.getElementById('theyd').textContent = "They'd";
                 }
             }
 
@@ -75,6 +77,7 @@ export class Application {
                 $('body').addClass('js-you');
                 Pubsub.publish('you')
                 self.you = true;
+                document.getElementById('theyd').textContent = "You'd";
                 self.processCharts();
                 return;
             }
@@ -132,15 +135,22 @@ export class Application {
         data.forEach((item)=>{
             array.push({"suburb": item[1], "price": item[index], "timeToPayOff": this.getSavingsLength(Application.savings, item[index]).payOffTime})
         });
+        array.sort(function(a,b){
+            return b.price-a.price;
+        });
         return array;
     }
 
     getBottomFive(index){
-        let data = this.sortData(index)
-            data =data.splice(data.length-5,data.length);
+        let data1 = this.sortData(index);
+        let data2 = data1.splice(data1.length-5,data1.length);
+
         let array = [];
-        data.forEach((item)=>{
+        data2.forEach((item)=>{
             array.push({"suburb": item[1], "price": item[index], "timeToPayOff": this.getSavingsLength(Application.savings, item[index]).payOffTime})
+        });        
+        array.sort(function(a,b){
+            return b.price-a.price;
         });
         return array.reverse();
     }
@@ -207,7 +217,7 @@ export class Application {
         var width = $("#mapContainer").width();
         var height = width*0.581;
         var features = (topojson.feature(topoJson, topoJson.objects.lgas).features);
-        this.map = L.mapbox.map('mapContainer', 'guardianaus.0963bc53').setView([-24, 132], 4);
+        this.map = L.mapbox.map('mapContainer', 'guardianaus.0963bc53').setView([-34, 151], 8);
         var map = this.map;
         this.topology = omnivore.topojson.parse(topoJson);
         this.layers = L.mapbox.featureLayer(this.topology).addTo(map);

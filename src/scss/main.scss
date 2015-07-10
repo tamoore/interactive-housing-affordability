@@ -64,6 +64,26 @@ section:first-child {
   margin-top: 0;
 }
 
+
+
+@at-root {
+	.demographics {
+		h3 {
+			overflow: hidden;
+			padding: 0 50px;
+
+		}
+	}
+	.default {
+		float: left;
+	}
+	.oryou {
+		float: right;
+		position: relative;
+		right: 30px;
+	}
+}
+
 @at-root {
   .you {
 	margin-left: 2rem;
@@ -106,7 +126,7 @@ section:first-child {
 	  @include mq($until: tablet){
 		min-width: 6rem;
 		margin-bottom: 1rem;
-		height: auto;
+		height: 6rem;
 	  }
 
 	  svg {

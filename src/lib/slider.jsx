@@ -9,6 +9,7 @@ export class SliderComponent extends React.Component {
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleYou = this.handleYou.bind(this);
         this.handleSaving = this.handleSaving.bind(this);
+        
 
         this.state = {
             savings: 412,
@@ -43,7 +44,14 @@ export class SliderComponent extends React.Component {
         var debounce = this.debounce((event)=>{
             this.handleInputChange(event);
         }, 50);
-        input.addEventListener('change', debounce);
+        var ie11andabove = navigator.userAgent.indexOf('Trident') != -1 && navigator.userAgent.indexOf('MSIE') == -1;
+        var ie10andbelow = navigator.userAgent.indexOf('MSIE') != -1;
+        if (ie11andabove || ie10andbelow){
+            input.addEventListener('change', debounce);
+            input.addEventListener('input', this.handleInput);
+        }
+
+
     }
 
     handleSaving(eventName, amount){
@@ -76,12 +84,16 @@ export class SliderComponent extends React.Component {
 
     handleInputChange(event){
         this.setState({
-            savings: event.target.value,
+            savings: parseInt(event.target.value),
             savingsInput:  event.target.value,
             savingsClass: "percent" + event.target.value
         })
-        Pubsub.publish('saving', event.target.value);
+         var debounce = this.debounce((event)=>{
+            Pubsub.publish('saving', this.state.savings);
+        }, 50);
+        debounce();
     }
+
 
     render(){
     //onChange={this.handleInputChange} onInput={this.handleInputChange}
@@ -91,7 +103,7 @@ export class SliderComponent extends React.Component {
                     {this.state.savingsInput}
                 </figure>
                 <div id="slider" style={this.state.styles}>
-                    <input type="range" className={this.state.savingsClass} ref="rangeInput" min="25" value={this.state.savings} max="2000" step="25" />
+                    <input type="range" className={this.state.savingsClass} onChange={this.handleInputChange}  ref="rangeInput" min="25" value={this.state.savings} max="2000" step="25" />
                 </div>
             </div>
         )
